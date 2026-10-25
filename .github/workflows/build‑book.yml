@@ -35,11 +35,9 @@ jobs:
           sudo apt-get install -y pandoc
           pandoc --version
 
-      # 4. 安装 Typst
+      # 4. 安装最新稳定版 Typst
       - name: Setup Typst
         uses: typst-community/setup-typst@v5
-        with:
-          typst-version: "^0.13.0"
 
       # 5. 检查 Typst 版本
       - name: Check Typst version
