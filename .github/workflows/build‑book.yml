@@ -1,47 +1,71 @@
+
 name: Build HowToLiveBetter Book Artifacts
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch: # 支持网页手动点击运行工作流
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu‑latest
+    name: Build Book
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     steps:
+      # 1. 拉取仓库代码
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch‑depth: 0
+          fetch-depth: 0
 
+      # 2. 配置 Node.js
       - name: Setup Node.js
-        uses: actions/setup‑node@v4
+        uses: actions/setup-node@v4
         with:
-          node‑version: "22"
+          node-version: "22"
 
-      - name: Install system deps (pandoc, typst)
+      # 3. 安装 Pandoc
+      - name: Install Pandoc
         run: |
-          sudo apt‑get update
-          sudo apt‑get install‑y pandoc
-          # 安装 typst >=0.13
-          curl‑fsSL https://typst.app/install | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+          pandoc --version
 
-      - name: Install epub tool dependencies
+      # 4. 安装 Typst
+      - name: Setup Typst
+        uses: typst-community/setup-typst@v5
+        with:
+          typst-version: "^0.13.0"
+
+      # 5. 检查 Typst 版本
+      - name: Check Typst version
+        run: typst --version
+
+      # 6. 安装 EPUB 依赖
+      - name: Install EPUB dependencies
         run: npm --prefix tools/epub ci
 
+      # 7. 构建离线 HTML
       - name: Build offline HTML
         run: node tools/offline/build.mjs
 
+      # 8. 构建 PDF
       - name: Build PDF
         run: node tools/pdf/build.mjs
 
-      - name: Build Anki deck (optional)
+      # 9. 构建 Anki 卡片
+      - name: Build Anki deck
         run: node tools/anki/build.mjs
 
+      # 10. 上传构建产物
       - name: Upload build artifacts
-        uses: actions/upload‑artifact@v4
+        uses: actions/upload-artifact@v4
         with:
-          name: book‑output
+          name: book-output
           path: dist/
-          retention‑days: 30
+          retention-days: 30
+          if-no-files-found: error
