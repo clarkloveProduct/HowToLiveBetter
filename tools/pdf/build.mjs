@@ -6,8 +6,11 @@
 import { writeFileSync, mkdirSync, statSync } from 'node:fs';
 import { resolve, dirname, posix, basename } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { ROOT, REPO, SITE, TITLE, read, readBook, gitCommit, buildStamp, stripBackLink } from '../lib/book.mjs';
+import { ROOT, REPO, TITLE, read, readBook, gitCommit, buildStamp, stripBackLink } from '../lib/book.mjs';
 import { splitLongItems } from '../lib/split-items.mjs';
+
+const SITE = 'https://renshengzhinan.co/';
+const SITE_INTRO = `## 在线阅读与持续更新\n\n这本书的在线版本持续更新，可按关键词、章节、证据等级和成本筛选。\n\n[访问高性价比人生指南官方网站](${SITE})\n\n网站地址：${SITE}\n`;
 
 const OUT = resolve(ROOT, process.argv[2] ?? 'dist/HowToLiveBetter.pdf');
 const WORK = resolve(ROOT, 'dist/pdf-build.md');
@@ -24,7 +27,7 @@ bookFiles.forEach(f => anchorOf.set(f, 'sec-' + (basename(f).match(/^\d+/)?.[0] 
 docFiles.forEach((f, i) => anchorOf.set(f, `doc-${i + 1}`));
 
 const pages = [
-  { src: 'README.md', md: `# 前言\n\n${description}\n\n${frontMd}`, anchor: 'front' },
+  { src: 'README.md', md: `# 前言\n\n${description}\n\n${SITE_INTRO}\n\n${frontMd}`, anchor: 'front' },
   { src: 'README.md', md: contentsMd.replace(/^## 目录/, '# 各节简介'), anchor: 'contents' },
   ...[...bookFiles, ...docFiles].map(src => ({ src, md: splitLongItems(stripBackLink(read(src))), anchor: anchorOf.get(src) })),
   { src: 'README.md', md: aboutMd(), anchor: 'about' },
