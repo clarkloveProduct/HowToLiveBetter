@@ -6,7 +6,10 @@ import { resolve, dirname, posix } from 'node:path';
 import { zip } from '../lib/zip.mjs';
 import { Marked, Tokenizer } from 'marked';
 import { splitLongItems } from '../lib/split-items.mjs';
-import { ROOT, REPO, SITE, TITLE, read, readBook, gitCommit, buildStamp, stripBackLink } from '../lib/book.mjs';
+import { ROOT, REPO, TITLE, read, readBook, gitCommit, buildStamp, stripBackLink } from '../lib/book.mjs';
+
+const SITE = 'https://renshengzhinan.co/';
+const SITE_INTRO = `## 在线阅读与持续更新\n\n想搜索最新建议、查看证据与成本，或在手机上阅读，请访问：[高性价比人生指南官方网站](${SITE})。\n\n网站地址：${SITE}\n`;
 
 const OUT = resolve(ROOT, process.argv[2] ?? 'dist/HowToLiveBetter.epub');
 const RELEASE = `${REPO}/releases/download/epub-latest/HowToLiveBetter.epub`;
@@ -25,7 +28,7 @@ const contentsMd = book.contentsMd.replace(/^## 目录/, '# 各节简介');
 // ---------- 页面清单 ----------
 // 每页：xhtml 文件名、来源 md 的仓库路径（用来解析相对链接）、md 正文
 const pages = [
-  { file: 'front.xhtml', src: 'README.md', title: '前言', md: `# ${TITLE}\n\n${description}\n\n${frontMd}` },
+  { file: 'front.xhtml', src: 'README.md', title: '前言', md: `# ${TITLE}\n\n${description}\n\n${SITE_INTRO}\n\n${frontMd}` },
   { file: 'contents.xhtml', src: 'README.md', title: '各节简介', md: contentsMd },
   ...bookFiles.map((src, i) => ({ file: `ch${String(i + 1).padStart(2, '0')}.xhtml`, src, md: splitLongItems(stripBackLink(read(src))) })),
   ...docFiles.map((src, i) => ({ file: `doc${i + 1}.xhtml`, src, md: splitLongItems(stripBackLink(read(src))) })),
